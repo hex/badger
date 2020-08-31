@@ -25,7 +25,7 @@ jobs:
       - name: Publish badger
         uses: rohith/publish-nuget@v2
         with:
-          PROJECT_FILE_PATH: /home/runner/work/badger/badger.csproj
+          PROJECT_FILE_PATH: '/home/runner/work/badger/badger/badger.csproj'
           NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
       - name: Publish to GitHub
         uses: tanaka-takayoshi/nuget-publish-to-github-packages-action@v2.1
