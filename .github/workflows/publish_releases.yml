@@ -46,7 +46,6 @@ jobs:
           draft: false
           prerelease: false
       - name: Upload osx-x64 assets
-        id: upload_release_asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -56,7 +55,6 @@ jobs:
           asset_name: Badger-osx-x64.zip
           asset_content_type: application/zip
       - name: Upload win-x64 assets
-        id: upload_release_asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -66,7 +64,6 @@ jobs:
           asset_name: Badger-win-x64.zip
           asset_content_type: application/zip  
       - name: Upload linux-x64 assets
-        id: upload_release_asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
