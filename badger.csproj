@@ -5,7 +5,7 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <Nullable>disable</Nullable>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageVersion>2020.8.4</PackageVersion>
+    <Version>2020.8.4</Version>
     <Title>badger</Title>
     <Authors>Alexandru Geana</Authors>
     <Description>A command-line tool that adds labels to your app icon</Description>
