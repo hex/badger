@@ -14,6 +14,10 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
+      - name: Set env
+        run: echo ::set-env name=RELEASE_VERSION::$(echo ${GITHUB_REF:11})
+      - name: Change NuGet package version
+        run: sed -i -E 's/\(<Version>\).*\(<\/Version>\)/<Version>${{ env.RELEASE_VERSION }}<\/Version>/g'
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v1
         with:
