@@ -1,6 +1,18 @@
 # Badger
 A command-line tool that adds labels to your app icon
-
+## Installation
+### macOS
+#### Homebrew
+```sh
+brew tap hex/formulae
+brew install badger
+```
+###Windows
+#### Scoop
+```sh
+scoop bucket add badger https://github.com/hex/Badger
+scoop install badger
+```
 ## Usage
 
 ```sh
