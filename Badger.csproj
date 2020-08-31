@@ -5,15 +5,19 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <Nullable>disable</Nullable>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageVersion>2020.8.0</PackageVersion>
-    <Title>Badger</Title>
+    <PackageVersion>2020.8.4</PackageVersion>
+    <Title>badger</Title>
     <Authors>Alexandru Geana</Authors>
     <Description>A command-line tool that adds labels to your app icon</Description>
     <Copyright>Alexandru Geana</Copyright>
-    <PackageProjectUrl>https://github.com/hex/Badger</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/hex/Badger</PackageLicenseUrl>
-    <RepositoryUrl>https://github.com/hex/Badger</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/hex/badger</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/hex/badger</PackageLicenseUrl>
+    <RepositoryUrl>https://github.com/hex/badger</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+    <AssemblyName>badger</AssemblyName>
+    <RootNamespace>badger</RootNamespace>
+    <PackageId>badger</PackageId>
+    <Product>badger</Product>
   </PropertyGroup>
 
   <ItemGroup>
