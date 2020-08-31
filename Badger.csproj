@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Nullable>enable</Nullable>
+    <Nullable>disable</Nullable>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageVersion>2020.8.0</PackageVersion>
     <Title>Badger</Title>
@@ -19,6 +19,9 @@
   <ItemGroup>
     <PackageReference Include="Magick.NET-Q8-x64" Version="7.21.1" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.20427.1" />
+    <BuiltProjectOutputGroupOutput Include="$(ProjectRuntimeConfigFilePath)">
+    	<FinalOutputPath>$(ProjectRuntimeConfigFilePath)</FinalOutputPath>
+   </BuiltProjectOutputGroupOutput>
   </ItemGroup>
 
 </Project>
