@@ -7,7 +7,7 @@ A command-line tool that adds labels to your app icon
 brew tap hex/formulae
 brew install badger
 ```
-###Windows
+### Windows
 #### Scoop
 ```sh
 scoop bucket add badger https://github.com/hex/Badger
