@@ -22,8 +22,6 @@ jobs:
         run: dotnet restore
       - name: Build
         run: dotnet build -c release --no-restore
-      - name: List files
-        run: ls -la /home/runner/work/badger/badger
       - name: Publish badger
         uses: rohith/publish-nuget@v2
         with:
