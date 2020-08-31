@@ -18,22 +18,6 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '3.1.401'
-      - name: Install dependencies
-        run: dotnet restore
-      - name: Build
-        run: dotnet build -c release --no-restore
-      - name: Publish badger
-        uses: rohith/publish-nuget@v2
-        with:
-          PROJECT_FILE_PATH: '/home/runner/work/badger/badger/badger.csproj'
-          NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
-      - name: Publish to GitHub
-        uses: tanaka-takayoshi/nuget-publish-to-github-packages-action@v2.1
-        with:
-          nupkg-path: '/home/runner/work/badger/badger/bin/release/*.nupkg'
-          repo-owner: 'hex'
-          gh-user: 'hex'
-          token: ${{ secrets.GITHUB_TOKEN }}
       # Runs a single command using the runners shell
       - name: Publish osx-x64
         run: dotnet publish -c release -r osx-x64 -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true
@@ -82,4 +66,20 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./badger-linux-x64.zip
           asset_name: badger-linux-x64.zip
-          asset_content_type: application/zip  
+          asset_content_type: application/zip
+      - name: Install dependencies
+          run: dotnet restore
+            - name: Build
+              run: dotnet build -c release --no-restore
+      - name: Publish badger
+        uses: rohith/publish-nuget@v2
+        with:
+          PROJECT_FILE_PATH: '/home/runner/work/badger/badger/badger.csproj'
+          NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
+      - name: Publish to GitHub
+        uses: tanaka-takayoshi/nuget-publish-to-github-packages-action@v2.1
+        with:
+          nupkg-path: '/home/runner/work/badger/badger/bin/release/*.nupkg'
+          repo-owner: 'hex'
+          gh-user: 'hex'
+          token: ${{ secrets.GITHUB_TOKEN }}
