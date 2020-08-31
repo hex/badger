@@ -1,12 +1,7 @@
-# This is a basic workflow to help you get started with Actions
-
 name: Publish releases
 
-# Controls when the action will run. Triggers the workflow on push or pull request
-# events but only for the master branch
 on:
   push:
-    # Sequence of patterns matched against refs/tags
     tags:
     - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
       
@@ -27,15 +22,15 @@ jobs:
       - name: Publish osx-x64
         run: dotnet publish -c release -r osx-x64 -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true
       - name: zip osx-x64
-        run: zip --junk-paths badger-osx-x64.zip /home/runner/work/Badger/Badger/bin/release/netcoreapp3.1/osx-x64/publish/badger
+        run: zip --junk-paths badger-osx-x64.zip /home/runner/work/badger/badger/bin/release/netcoreapp3.1/osx-x64/publish/badger
       - name: Publish win-x64
         run: dotnet publish -c release -r win-x64 -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true
       - name: zip win-x64
-        run: zip --junk-paths badger-win-x64.zip /home/runner/work/Badger/Badger/bin/release/netcoreapp3.1/win-x64/publish/badger.exe
+        run: zip --junk-paths badger-win-x64.zip /home/runner/work/badger/badger/bin/release/netcoreapp3.1/win-x64/publish/badger.exe
       - name: Publish linux-x64
         run: dotnet publish -c release -r linux-x64 -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true
       - name: zip linux-x64
-        run: zip --junk-paths badger-linux-x64.zip /home/runner/work/Badger/Badger/bin/release/netcoreapp3.1/linux-x64/publish/badger
+        run: zip --junk-paths badger-linux-x64.zip /home/runner/work/badger/badger/bin/release/netcoreapp3.1/linux-x64/publish/badger
       - name: Create release
         id: create_release
         uses: actions/create-release@v1
