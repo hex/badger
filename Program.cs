@@ -134,7 +134,8 @@ namespace Badger
                 badge.Resize(icon.Width + icon.Width / 2, icon.Height + icon.Height / 2);
                 icon.Composite(badge, Enum.Parse<Gravity>(options.Position), CompositeOperator.Over);
 
-                Console.WriteLine($"{OutputDir}{Path.DirectorySeparatorChar}{Path.GetFileName(path)}");
+                Console.WriteLine(
+                    $"Writing to: {(options.Replace ? path : $"{OutputDir}{Path.DirectorySeparatorChar}{Path.GetFileName(path)}")}");
 
                 icon.Write(options.Replace
                     ? path
