@@ -13,6 +13,27 @@ namespace Badger
         public string Icon { get; set; }
         public string Color { get; set; }
         public string TextColor { get; set; }
+        private string _textAlignment;
+
+        public string TextAlignment
+        {
+            get => _textAlignment;
+            set =>
+                _textAlignment = value switch
+                {
+                    "top" => "North",
+                    "left" => "West",
+                    "bottom" => "South",
+                    "right" => "East",
+                    "topLeft" => "Northwest",
+                    "topRight" => "Northeast",
+                    "bottomLeft" => "Southwest",
+                    "bottomRight" => "Southeast",
+                    "center" => "Center",
+                    _ => _textAlignment
+                };
+        }
+
         public int Angle { get; set; }
         public int OffsetX { get; set; }
         public int OffsetY { get; set; }
@@ -49,6 +70,7 @@ namespace Badger
         {
             command.AddOption(Color());
             command.AddOption(TextColor());
+            command.AddOption(TextAlignment());
             command.AddOption(Angle());
             command.AddOption(OffsetX());
             command.AddOption(OffsetY());
@@ -62,6 +84,10 @@ namespace Badger
             Option TextColor() => new Option<string>(new[] {"-t", "--text-color",},
                 () => "#F9F7ED",
                 "Set badge text color with a hexadecimal color code");
+
+            Option TextAlignment() => new Option<string>(new[] {"-l", "--text-alignment",},
+                () => "center",
+                "Set badge text alignment");
 
             Option Angle() => new Option<int>(new[] {"-a", "--angle"}, () => 0, "Set badge rotation");
             Option OffsetX() => new Option<int>(new[] {"-x", "--offset-x"}, () => 0, "Set badge x-axis offset");
@@ -101,7 +127,7 @@ namespace Badger
             var bottomSettings = new MagickReadSettings
             {
                 BackgroundColor = new MagickColor(options.Color),
-                TextGravity = Gravity.Center,
+                TextGravity = Enum.Parse<Gravity>(options.TextAlignment),
                 FontWeight = FontWeight.Bold,
                 FontPointsize = 180,
                 AntiAlias = true,
@@ -116,13 +142,16 @@ namespace Badger
                 {
                     using (var badge = new MagickImageCollection())
                     {
+                        bottom.BorderColor = new MagickColor(options.Color);
+                        bottom.Border(100, 0);
+
                         badge.Add(top);
                         badge.Add(bottom);
 
                         using (var result = badge.AppendVertically())
                         {
                             result.BackgroundColor = MagickColors.Transparent;
-                            result.Rotate(options.Angle);
+                            // result.Rotate(options.Angle);
 
                             result.Write($"{OutputDir}{Path.DirectorySeparatorChar}badge.png");
                         }
@@ -136,12 +165,17 @@ namespace Badger
             using (var icon = new MagickImage(path))
             {
                 var badge = new MagickImage($"{OutputDir}{Path.DirectorySeparatorChar}badge.png");
-                
-                badge.Resize(icon.Width + icon.Width / 4, icon.Height + icon.Height / 4);
+
+                badge.Resize(icon.Width + icon.Width / 2, icon.Height + icon.Height / 2);
+                badge.BackgroundColor = MagickColors.Transparent;
+                badge.Rotate(options.Angle);
+
+                var offsetX = icon.Width * options.OffsetX / 100d;
+                var offsetY = icon.Height * options.OffsetY / 100d;
                 icon.Composite(
                     badge,
                     Enum.Parse<Gravity>(options.Position),
-                    new PointD(options.OffsetX, options.OffsetY),
+                    new PointD(offsetX, offsetY),
                     CompositeOperator.Over
                 );
 

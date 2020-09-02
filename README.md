@@ -1,6 +1,12 @@
 ![GitHub](https://img.shields.io/github/license/hex/badger?style=flat-square)
 ![Language](https://img.shields.io/badge/language-C%23-blue?style=flat-square)
 ![Platform](https://img.shields.io/badge/platform-windows%20%7C%20macos%20%7C%20linux-lightgrey?style=flat-square)
+
+<p style="text-align: center">
+<img src="Assets/badger.png" title="Badger" alt="Badger">
+</p>
+
+
 # Badger
 A cross-platform command-line tool that adds labels to your app icon. 
 
