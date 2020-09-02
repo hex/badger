@@ -1,0 +1,18 @@
+{
+  "homepage": "https://github.com/hex/Badger",
+  "license": {
+    "identifier": "MIT",
+    "url": "https://opensource.org/licenses/MIT"
+  },
+  "description": "Command-line tool that adds labels to your app icon",
+  "version": "2020.9.2",
+  "bin": [
+    "badger.exe"
+  ],
+  "architecture": {
+    "64bit": {
+      "hash": "6a2612b13fb50e009d501e1928b34e393690b0f0172b323b628e6afa39b6ce15",
+      "url": "https://github.com/hex/badger/releases/download/v2020.9.2/badger-win-x64.zip"
+    }
+  }
+}

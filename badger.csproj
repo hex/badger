@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Nullable>disable</Nullable>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>2020.9.2</Version>
+    <Title>badger</Title>
+    <Authors>Alexandru Geana</Authors>
+    <Description>A command-line tool that adds labels to your app icon</Description>
+    <Copyright>Alexandru Geana</Copyright>
+    <PackageProjectUrl>https://github.com/hex/badger</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/hex/badger</PackageLicenseUrl>
+    <RepositoryUrl>https://github.com/hex/badger</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <AssemblyName>badger</AssemblyName>
+    <RootNamespace>badger</RootNamespace>
+    <PackageId>badger</PackageId>
+    <Product>badger</Product>
+    <PackageVersion>2020.9.3</PackageVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Magick.NET-Q8-x64" Version="7.21.1" />
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.20427.1" />
+    <BuiltProjectOutputGroupOutput Include="$(ProjectRuntimeConfigFilePath)">
+    	<FinalOutputPath>$(ProjectRuntimeConfigFilePath)</FinalOutputPath>
+   </BuiltProjectOutputGroupOutput>
+  </ItemGroup>
+
+</Project>
