@@ -3,6 +3,7 @@ using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using ImageMagick;
 
 namespace Badger
@@ -119,7 +120,7 @@ namespace Badger
             var topSettings = new MagickReadSettings
             {
                 BackgroundColor = new MagickColor(options.Color),
-                FontPointsize = 40,
+                FontPointsize = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? 10 : 40,
                 FillColor = new MagickColor(options.Color),
                 Width = 1520
             };
