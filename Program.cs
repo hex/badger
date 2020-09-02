@@ -14,6 +14,8 @@ namespace Badger
         public string Color { get; set; }
         public string TextColor { get; set; }
         public int Angle { get; set; }
+        public int OffsetX { get; set; }
+        public int OffsetY { get; set; }
 
         private string _position;
 
@@ -48,18 +50,22 @@ namespace Badger
             command.AddOption(Color());
             command.AddOption(TextColor());
             command.AddOption(Angle());
+            command.AddOption(OffsetX());
+            command.AddOption(OffsetY());
             command.AddOption(Position());
             command.AddOption(Replace());
 
             Option Color() =>
-                new Option<string>(new[] {"-c", "--color"}, () => "goldenrod1",
+                new Option<string>(new[] {"-c", "--color"}, () => "#4096EE",
                     "Set badge color with a hexadecimal color code");
 
             Option TextColor() => new Option<string>(new[] {"-t", "--text-color",},
-                () => "white",
+                () => "#F9F7ED",
                 "Set badge text color with a hexadecimal color code");
 
             Option Angle() => new Option<int>(new[] {"-a", "--angle"}, () => 0, "Set badge rotation");
+            Option OffsetX() => new Option<int>(new[] {"-x", "--offset-x"}, () => 0, "Set badge x-axis offset");
+            Option OffsetY() => new Option<int>(new[] {"-y", "--offset-y"}, () => 0, "Set badge y-axis offset");
             Option Position() => new Option<string>(new[] {"-p", "--position"}, () => "bottom", "Set badge position");
             Option Replace() => new Option<bool>(new[] {"-r", "--replace"}, () => false, "Replace input icon");
         }
@@ -130,9 +136,14 @@ namespace Badger
             using (var icon = new MagickImage(path))
             {
                 var badge = new MagickImage($"{OutputDir}{Path.DirectorySeparatorChar}badge.png");
-
-                badge.Resize(icon.Width + icon.Width / 2, icon.Height + icon.Height / 2);
-                icon.Composite(badge, Enum.Parse<Gravity>(options.Position), CompositeOperator.Over);
+                
+                badge.Resize(icon.Width + icon.Width / 4, icon.Height + icon.Height / 4);
+                icon.Composite(
+                    badge,
+                    Enum.Parse<Gravity>(options.Position),
+                    new PointD(options.OffsetX, options.OffsetY),
+                    CompositeOperator.Over
+                );
 
                 Console.WriteLine(
                     $"Writing to: {(options.Replace ? path : $"{OutputDir}{Path.DirectorySeparatorChar}{Path.GetFileName(path)}")}");
@@ -177,6 +188,15 @@ namespace Badger
                     else
                     {
                         AppendBadge(badgeOptions, badgeOptions.Icon);
+                    }
+
+                    if (badgeOptions.Replace)
+                    {
+                        Directory.Delete(OutputDir, true);
+                    }
+                    else
+                    {
+                        File.Delete($"{OutputDir}{Path.DirectorySeparatorChar}badge.png");
                     }
                 });
 
