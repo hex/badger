@@ -5,7 +5,7 @@
     "url": "https://opensource.org/licenses/MIT"
   },
   "description": "Command-line tool that adds labels to your app icon",
-  "version": "2020.9.3",
+  "version": "2022.12.0",
   "bin": [
     "badger.exe"
   ],
