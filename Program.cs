@@ -171,14 +171,16 @@ namespace Badger
                 badge.BackgroundColor = MagickColors.Transparent;
                 badge.Rotate(options.Angle);
 
-                var offsetX = icon.Width * options.OffsetX / 100d;
-                var offsetY = icon.Height * options.OffsetY / 100d;
-                icon.Composite(
-                    badge,
-                    Enum.Parse<Gravity>(options.Position),
-                    new PointD(offsetX, offsetY),
-                    CompositeOperator.Over
-                );
+                var offsetX = icon.Width * options.OffsetX / 100;
+                var offsetY = icon.Height * options.OffsetY / 100;
+                // icon.Composite(
+                //     badge,
+                //     Enum.Parse<Gravity>(options.Position),
+                //     new PointD(offsetX, offsetY),
+                //     CompositeOperator.Over
+                // );
+                
+                icon.Composite(badge,Enum.Parse<Gravity>(options.Position), offsetX, offsetY, CompositeOperator.Over);
 
                 Console.WriteLine(
                     $"Writing to: {(options.Replace ? path : $"{OutputDir}{Path.DirectorySeparatorChar}{Path.GetFileName(path)}")}");
@@ -191,6 +193,7 @@ namespace Badger
 
         private static int Main(string[] args)
         {
+            
             var rootCommand = new RootCommand
             {
                 Description = "A command-line tool that adds labels to your app icon",
