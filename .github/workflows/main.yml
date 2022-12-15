@@ -1,0 +1,47 @@
+name: Publish releases
+
+on:
+  push:
+    tags:
+    - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+    
+jobs:
+  publish:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set env
+        run: echo ::set-env name=RELEASE_VERSION::$(echo ${GITHUB_REF:11})
+      - name: Set workspace env  
+        run: echo ::set-env name=GITHUB_WORKSPACE::$(echo ${GITHUB_WORKSPACE})
+      - name: Change NuGet package version
+        run: sed -i -E 's/(<Version>)[^>]+(<\/Version>)/\1${{ env.RELEASE_VERSION }}\2/g' ${GITHUB_WORKSPACE}/badger.csproj && cat ${GITHUB_WORKSPACE}/badger.csproj
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 6.0.x
+      - name: Publish osx-x64
+        run: dotnet publish -c release -r osx-x64 -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true
+      - name: zip osx-x64
+        run: zip --junk-paths badger-osx-x64.zip ${GITHUB_WORKSPACE}/bin/release/net6.0/osx-x64/publish/badger
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          draft: false
+          prerelease: false
+      - name: Upload osx-x64 assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with: 
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./badger-osx-x64.zip
+          asset_name: badger-osx-x64.zip
+          asset_content_type: application/zip
+    
