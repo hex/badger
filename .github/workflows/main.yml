@@ -27,19 +27,19 @@ jobs:
       - name: Publish osx-x64
         run: dotnet publish -c Release -r osx-x64 --self-contained true
       - name: zip osx-x64
-        run: zip --junk-paths badger-osx-x64.zip ${GITHUB_WORKSPACE}/bin/release/net6.0/osx-x64/publish/badger
+        run: zip --junk-paths badger-osx-x64.zip ${GITHUB_WORKSPACE}/bin/Release/net6.0/osx-x64/publish/badger
       - name: Publish osx-arm64
         run: dotnet publish -c Release -r osx-arm64 --self-contained true
       - name: zip osx-arm64
-        run: zip --junk-paths badger-osx-arm64.zip ${GITHUB_WORKSPACE}/bin/release/net6.0/osx-arm64/publish/badger
+        run: zip --junk-paths badger-osx-arm64.zip ${GITHUB_WORKSPACE}/bin/Release/net6.0/osx-arm64/publish/badger
       - name: Publish win-x64
         run: dotnet publish -c Release -r win-x64 --self-contained true
       - name: zip osx-arm64
-        run: zip --junk-paths badger-win-x64.zip ${GITHUB_WORKSPACE}/bin/release/net6.0/win-x64/publish/badger.exe
+        run: zip --junk-paths badger-win-x64.zip ${GITHUB_WORKSPACE}/bin/Release/net6.0/win-x64/publish/badger.exe
       - name: Publish linux-x64
         run: dotnet publish -c Release -r linux-x64 --self-contained true
       - name: zip osx-arm64
-        run: zip --junk-paths badger-linux-x64.zip ${GITHUB_WORKSPACE}/bin/release/net6.0/linux-x64/publish/badger
+        run: zip --junk-paths badger-linux-x64.zip ${GITHUB_WORKSPACE}/bin/Release/net6.0/linux-x64/publish/badger
 
       - name: Create release
         id: create_release
