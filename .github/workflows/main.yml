@@ -29,7 +29,7 @@ jobs:
         run: zip --junk-paths badger-osx-x64.zip ${GITHUB_WORKSPACE}/bin/release/net6.0/osx-x64/publish/badger
       - name: Create release
         id: create_release
-        uses: actions/create-release@v
+        uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
