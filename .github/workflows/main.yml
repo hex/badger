@@ -23,10 +23,24 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 6.0.x
+
       - name: Publish osx-x64
-        run: dotnet publish -c release -r osx-x64 -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true
+        run: dotnet publish -c Release -r osx-x64 --self-contained true
       - name: zip osx-x64
         run: zip --junk-paths badger-osx-x64.zip ${GITHUB_WORKSPACE}/bin/release/net6.0/osx-x64/publish/badger
+      - name: Publish osx-arm64
+        run: dotnet publish -c Release -r osx-arm64 --self-contained true
+      - name: zip osx-arm64
+        run: zip --junk-paths badger-osx-arm64.zip ${GITHUB_WORKSPACE}/bin/release/net6.0/osx-arm64/publish/badger
+      - name: Publish win-x64
+        run: dotnet publish -c Release -r win-x64 --self-contained true
+      - name: zip osx-arm64
+        run: zip --junk-paths badger-win-x64.zip ${GITHUB_WORKSPACE}/bin/release/net6.0/win-x64/publish/badger.exe
+      - name: Publish linux-x64
+        run: dotnet publish -c Release -r linux-x64 --self-contained true
+      - name: zip osx-arm64
+        run: zip --junk-paths badger-linux-x64.zip ${GITHUB_WORKSPACE}/bin/release/net6.0/linux-x64/publish/badger
+
       - name: Create release
         id: create_release
         uses: actions/create-release@v1
@@ -45,3 +59,50 @@ jobs:
           asset_path: ./badger-osx-x64.zip
           asset_name: badger-osx-x64.zip
           asset_content_type: application/zip
+
+      - name: Upload osx-arm64 assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./badger-osx-arm64.zip
+          asset_name: badger-osx-arm64.zip
+          asset_content_type: application/zip
+
+      - name: Upload win-x64 assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./badger-win-x64.zip
+          asset_name: badger-win-x64.zip
+          asset_content_type: application/zip
+
+      - name: Upload linux-x64 assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./badger-linux-x64.zip
+          asset_name: badger-linux-x64.zip
+          asset_content_type: application/zip
+
+      - name: Install dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build -c Release --no-restore
+      - name: Publish badger
+        uses: rohith/publish-nuget@v2
+        with:
+          PROJECT_FILE_PATH: ${{env.GITHUB_WORKSPACE}}/badger.csproj
+          NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
+      - name: Publish to GitHub
+        uses: tanaka-takayoshi/nuget-publish-to-github-packages-action@v2.1
+        with:
+          nupkg-path: ${{env.GITHUB_WORKSPACE}}/bin/release/*.nupkg
+          repo-owner: 'hex'
+          gh-user: 'hex'
+          token: ${{ secrets.GITHUB_TOKEN }}
