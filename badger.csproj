@@ -5,20 +5,21 @@
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>disable</Nullable>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>2022.12.0</Version>
+    <Version>2022.12.1</Version>
     <Title>badger</Title>
     <Authors>Alexandru Geana</Authors>
     <Description>A command-line tool that adds labels to your app icon</Description>
     <Copyright>Alexandru Geana</Copyright>
     <PackageProjectUrl>https://github.com/hex/badger</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/hex/badger</PackageLicenseUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <RepositoryUrl>https://github.com/hex/badger</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <AssemblyName>badger</AssemblyName>
     <RootNamespace>badger</RootNamespace>
     <PackageId>badger</PackageId>
     <Product>badger</Product>
-    <PackageVersion>2022.12.0</PackageVersion>
+    <PackageVersion>2022.12.1</PackageVersion>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
     <DebugType>embedded</DebugType>

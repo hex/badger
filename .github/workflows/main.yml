@@ -94,15 +94,15 @@ jobs:
         run: dotnet restore
       - name: Build
         run: dotnet build -c Release --no-restore
-      - name: Publish badger
-        uses: rohith/publish-nuget@v2
+      - name: Publish badger NuGet
+        uses: brandedoutcast/publish-nuget@v2.5.5
         with:
           PROJECT_FILE_PATH: ${{env.GITHUB_WORKSPACE}}/badger.csproj
           NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
       - name: Publish to GitHub
         uses: tanaka-takayoshi/nuget-publish-to-github-packages-action@v2.1
         with:
-          nupkg-path: ${{env.GITHUB_WORKSPACE}}/bin/release/*.nupkg
+          nupkg-path: ${{env.GITHUB_WORKSPACE}}/bin/Release/*.nupkg
           repo-owner: 'hex'
           gh-user: 'hex'
           token: ${{ secrets.GITHUB_TOKEN }}
