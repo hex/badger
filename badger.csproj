@@ -26,6 +26,7 @@
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     <PublishTrimmed>true</PublishTrimmed>
+    <UseAppHost>true</UseAppHost>
   </PropertyGroup>
 
   <ItemGroup>

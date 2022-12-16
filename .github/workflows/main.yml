@@ -6,8 +6,55 @@ on:
       - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
 
 jobs:
-  publish:
+  publish_macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set env
+        run: echo "RELEASE_VERSION=$(echo ${GITHUB_REF:11})" >> $GITHUB_ENV
+      - name: Set workspace env
+        run: echo "GITHUB_WORKSPACE=$(echo ${GITHUB_WORKSPACE})" >> $GITHUB_ENV
+      - name: .NET project version updater
+        uses: vers-one/dotnet-project-version-updater@v1.2
+        with:
+          file: 'badger.csproj'
+          version: ${{ env.RELEASE_VERSION }}
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+
+      - name: Publish osx-x64
+        run: dotnet publish -c Release -r osx-x64 --self-contained true
+      - name: Publish osx-arm64
+        run: dotnet publish -c Release -r osx-arm64 --self-contained true
+      - name: chmod
+        run: |
+          chmod +x ${GITHUB_WORKSPACE}/bin/Release/net7.0/osx-x64/publish/badger
+          chmod +x ${GITHUB_WORKSPACE}/bin/Release/net7.0/osx-arm64/publish/badger
+      - name: Add Cert to Keychain
+        uses: apple-actions/import-codesign-certs@v1
+        with:
+          p12-file-base64: ${{ secrets.MAC_CERT_BASE64 }}
+          p12-password: ${{ secrets.MAC_CERT_PASSWORD }}
+      - name: Sign binaries
+        run: |
+          codesign --timestamp --options=runtime --no-strict --force --sign "Developer ID Application: Alexandru Geana (7G4UQW35EL)" ${GITHUB_WORKSPACE}/bin/Release/net7.0/osx-x64/publish/badger --entitlements ${GITHUB_WORKSPACE}/entitlements.plist
+          codesign --timestamp --options=runtime --no-strict --force --sign "Developer ID Application: Alexandru Geana (7G4UQW35EL)" ${GITHUB_WORKSPACE}/bin/Release/net7.0/osx-arm64/publish/badger --entitlements ${GITHUB_WORKSPACE}/entitlements.plist
+      - name: Zip binaries
+        run: |
+          zip --junk-paths badger-osx-x64.zip ${GITHUB_WORKSPACE}/bin/Release/net7.0/osx-x64/publish/badger
+          zip --junk-paths badger-osx-arm64.zip ${GITHUB_WORKSPACE}/bin/Release/net7.0/osx-arm64/publish/badger
+      - name: Notarize binaries
+        run: |
+          chmod +x notarize.sh
+          ls -la
+          ./notarize.sh "${{ secrets.MAC_DEV_EMAIL }}" "${{ secrets.MAC_DEV_PASSWORD }}" "com.hexul.badger" "7G4UQW35EL" "./badger-osx-x64.zip"
+          ./notarize.sh "${{ secrets.MAC_DEV_EMAIL }}" "${{ secrets.MAC_DEV_PASSWORD }}" "com.hexul.badger" "7G4UQW35EL" "./badger-osx-arm64.zip"
+  publish_linux:
     # The type of runner that the job will run on
+    needs: publish_macos
     runs-on: ubuntu-latest
 
     steps:
@@ -16,19 +63,23 @@ jobs:
         run: echo "RELEASE_VERSION=$(echo ${GITHUB_REF:11})" >> $GITHUB_ENV
       - name: Set workspace env
         run: echo "GITHUB_WORKSPACE=$(echo ${GITHUB_WORKSPACE})" >> $GITHUB_ENV
-      - name: Change NuGet package version
-        run: sed -i -E 's/(<Version>)[^>]+(<\/Version>)/\1${{ env.RELEASE_VERSION }}\2/g' ${GITHUB_WORKSPACE}/badger.csproj && cat ${GITHUB_WORKSPACE}/badger.csproj
+      - name: .NET project version updater
+        uses: vers-one/dotnet-project-version-updater@v1.2
+        with:
+          file: 'badger.csproj'
+          version: ${{ env.RELEASE_VERSION }}
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 7.0.x
 
-      - name: Publish osx-x64
-        run: dotnet publish -c Release -r osx-x64 --self-contained true
+      # - name: Publish osx-x64
+      #   run: dotnet publish -c Release -r osx-x64 --self-contained true
       - name: zip osx-x64
         run: zip --junk-paths badger-osx-x64.zip ${GITHUB_WORKSPACE}/bin/Release/net7.0/osx-x64/publish/badger
-      - name: Publish osx-arm64
-        run: dotnet publish -c Release -r osx-arm64 --self-contained true
+      # - name: Publish osx-arm64
+      #   run: dotnet publish -c Release -r osx-arm64 --self-contained true
       - name: zip osx-arm64
         run: zip --junk-paths badger-osx-arm64.zip ${GITHUB_WORKSPACE}/bin/Release/net7.0/osx-arm64/publish/badger
       - name: Publish win-x64
@@ -89,13 +140,13 @@ jobs:
           asset_name: badger-linux-x64.zip
           asset_content_type: application/zip
 
-      - name: Install dependencies
-        run: dotnet restore
-      - name: Build
-        run: dotnet build -c Release --no-restore
-      - name: Package
-        run: dotnet pack -c Release -o . ${{env.GITHUB_WORKSPACE}}/badger.csproj
-      - name: Publish to NuGet
-        run: dotnet nuget push *.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
-      - name: publish package to GitHub
-        run: dotnet nuget push *.nupkg --api-key ${{secrets.GITHUB_TOKEN}} --source "https://nuget.pkg.github.com/hex/index.json" --skip-duplicate
+      # - name: Install dependencies
+      #   run: dotnet restore
+      # - name: Build
+      #   run: dotnet build -c Release --no-restore
+      # - name: Package
+      #   run: dotnet pack -c Release -o . ${{env.GITHUB_WORKSPACE}}/badger.csproj
+      # - name: Publish to NuGet
+      #   run: dotnet nuget push *.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
+      # - name: publish package to GitHub
+      #   run: dotnet nuget push *.nupkg --api-key ${{secrets.GITHUB_TOKEN}} --source "https://nuget.pkg.github.com/hex/index.json" --skip-duplicate
