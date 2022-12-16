@@ -11,7 +11,6 @@
     <Description>A command-line tool that adds labels to your app icon</Description>
     <Copyright>Alexandru Geana</Copyright>
     <PackageProjectUrl>https://github.com/hex/badger</PackageProjectUrl>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <RepositoryUrl>https://github.com/hex/badger</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
