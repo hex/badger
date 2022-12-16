@@ -94,11 +94,10 @@ jobs:
         run: dotnet restore
       - name: Build
         run: dotnet build -c Release --no-restore
-      - name: Publish badger NuGet
-        uses: brandedoutcast/publish-nuget@v2.5.5
-        with:
-          PROJECT_FILE_PATH: ${{env.GITHUB_WORKSPACE}}/badger.csproj
-          NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
+      - name: Package
+        run: dotnet pack -c Release -o . ${{env.GITHUB_WORKSPACE}}/badger.csproj
+      - name: Publish to NuGet
+        run: dotnet nuget push *.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
       - name: Publish to GitHub
         uses: tanaka-takayoshi/nuget-publish-to-github-packages-action@v2.1
         with:

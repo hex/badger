@@ -12,6 +12,7 @@
     <Copyright>Alexandru Geana</Copyright>
     <PackageProjectUrl>https://github.com/hex/badger</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/hex/badger</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <AssemblyName>badger</AssemblyName>
