@@ -14,7 +14,7 @@ Badger is powered by [SixLabors.ImageSharp](https://github.com/SixLabors/ImageSh
 
 ## Installation
 
-### macOS
+### macOS/Linux
 
 #### Homebrew
 
