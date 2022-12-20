@@ -41,16 +41,16 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <None Include="README.md" Pack="true" PackagePath=""/>
+        <None Include="README.md" Pack="true" PackagePath="" />
         <BuiltProjectOutputGroupOutput Include="$(ProjectRuntimeConfigFilePath)">
             <FinalOutputPath>$(ProjectRuntimeConfigFilePath)</FinalOutputPath>
         </BuiltProjectOutputGroupOutput>
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="ConsoleAppFramework" Version="4.2.4"/>
-        <PackageReference Include="SixLabors.ImageSharp" Version="2.1.3"/>
-        <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta15"/>
+        <PackageReference Include="ConsoleAppFramework" Version="4.2.4" />
+        <PackageReference Include="SixLabors.ImageSharp" Version="2.1.3" />
+        <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta15" />
     </ItemGroup>
 
 </Project>
