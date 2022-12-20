@@ -5,14 +5,14 @@
     "url": "https://opensource.org/licenses/MIT"
   },
   "description": "Command-line tool that adds labels to your app icon",
-  "version": "2022.12.0",
+  "version": "2022.12.6",
   "bin": [
     "badger.exe"
   ],
   "architecture": {
     "64bit": {
-      "hash": "3e31e88b702346f448cc0647659e23062380ea1ea60af9c5e68fde64d2cc49be",
-      "url": "https://github.com/hex/badger/releases/download/v2020.9.3/badger-win-x64.zip"
+      "hash": "3d79dda1fcd2c83fa09db26cbaa2f2dcf4b64717f109ee4705fb7579b80e47a9",
+      "url": "https://github.com/hex/badger/releases/download/v2022.12.6/badger-win-x64.zip"
     }
   }
 }
