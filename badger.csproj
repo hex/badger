@@ -7,7 +7,7 @@
         <Nullable>enable</Nullable>
         <LangVersion>11</LangVersion>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Version>2022.12.5</Version>
+        <Version>2022.12.6</Version>
         <Title>badger</Title>
         <Authors>Alexandru Geana</Authors>
         <Description>A command-line tool that adds labels to your app icon</Description>
@@ -21,7 +21,7 @@
         <RootNamespace>badger</RootNamespace>
         <PackageId>badger</PackageId>
         <Product>badger</Product>
-        <PackageVersion>2022.12.5</PackageVersion>
+        <PackageVersion>2022.12.6</PackageVersion>
         <PublishSingleFile>true</PublishSingleFile>
         <SelfContained>true</SelfContained>
         <DebugType>embedded</DebugType>
