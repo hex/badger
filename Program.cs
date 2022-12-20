@@ -1,244 +1,195 @@
-﻿using System;
-using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using ImageMagick;
+﻿// See https://aka.ms/new-console-template for more information
 
-namespace Badger
+using System.Numerics;
+using SixLabors.Fonts;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Drawing;
+using SixLabors.ImageSharp.Drawing.Processing;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using Color = SixLabors.ImageSharp.Color;
+using Path = System.IO.Path;
+using Point = SixLabors.ImageSharp.Point;
+
+const string outputDir = "badgerOutput";
+
+void EmptyDirectory(string path)
 {
-    internal class BadgeOptions
-    {
-        public string Text { get; set; }
-        public string Icon { get; set; }
-        public string Color { get; set; }
-        public string TextColor { get; set; }
-        private string _textAlignment;
+    var di = new DirectoryInfo(path);
 
-        public string TextAlignment
-        {
-            get => _textAlignment;
-            set =>
-                _textAlignment = value switch
-                {
-                    "top" => "North",
-                    "left" => "West",
-                    "bottom" => "South",
-                    "right" => "East",
-                    "topLeft" => "Northwest",
-                    "topRight" => "Northeast",
-                    "bottomLeft" => "Southwest",
-                    "bottomRight" => "Southeast",
-                    "center" => "Center",
-                    _ => _textAlignment
-                };
-        }
-
-        public int Angle { get; set; }
-        public int OffsetX { get; set; }
-        public int OffsetY { get; set; }
-
-        private string _position;
-
-        public string Position
-        {
-            get => _position;
-            set =>
-                _position = value switch
-                {
-                    "top" => "North",
-                    "left" => "West",
-                    "bottom" => "South",
-                    "right" => "East",
-                    "topLeft" => "Northwest",
-                    "topRight" => "Northeast",
-                    "bottomLeft" => "Southwest",
-                    "bottomRight" => "Southeast",
-                    "center" => "Center",
-                    _ => _position
-                };
-        }
-
-        public bool Replace { get; set; }
-    }
-
-    internal static class Program
-    {
-        private const string OutputDir = "badgerOutput";
-
-        private static void AddAllOptions(Command command)
-        {
-            command.AddOption(Color());
-            command.AddOption(TextColor());
-            command.AddOption(TextAlignment());
-            command.AddOption(Angle());
-            command.AddOption(OffsetX());
-            command.AddOption(OffsetY());
-            command.AddOption(Position());
-            command.AddOption(Replace());
-
-            Option Color() =>
-                new Option<string>(new[] {"-c", "--color"}, () => "#4096EE",
-                    "Set badge color with a hexadecimal color code");
-
-            Option TextColor() => new Option<string>(new[] {"-t", "--text-color",},
-                () => "#F9F7ED",
-                "Set badge text color with a hexadecimal color code");
-
-            Option TextAlignment() => new Option<string>(new[] {"-l", "--text-alignment",},
-                () => "center",
-                "Set badge text alignment");
-
-            Option Angle() => new Option<int>(new[] {"-a", "--angle"}, () => 0, "Set badge rotation");
-            Option OffsetX() => new Option<int>(new[] {"-x", "--offset-x"}, () => 0, "Set badge x-axis offset");
-            Option OffsetY() => new Option<int>(new[] {"-y", "--offset-y"}, () => 0, "Set badge y-axis offset");
-            Option Position() => new Option<string>(new[] {"-p", "--position"}, () => "bottom", "Set badge position");
-            Option Replace() => new Option<bool>(new[] {"-r", "--replace"}, () => false, "Replace input icon");
-        }
-
-        private static void EmptyDirectory(string path)
-        {
-            var di = new DirectoryInfo(path);
-
-            foreach (var file in di.GetFiles())
-            {
-                file.Delete();
-            }
-
-            foreach (var dir in di.GetDirectories())
-            {
-                dir.Delete(true);
-            }
-        }
-
-        private static void CreateBadge(BadgeOptions options)
-        {
-            Directory.CreateDirectory(OutputDir);
-            EmptyDirectory(OutputDir);
-
-            var topSettings = new MagickReadSettings
-            {
-                BackgroundColor = new MagickColor(options.Color),
-                FontPointsize = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? 10 : 40,
-                FillColor = new MagickColor(options.Color),
-                Width = 1520
-            };
-
-            var bottomSettings = new MagickReadSettings
-            {
-                BackgroundColor = new MagickColor(options.Color),
-                TextGravity = Enum.Parse<Gravity>(options.TextAlignment),
-                FontWeight = FontWeight.Bold,
-                FontPointsize = 180,
-                AntiAlias = true,
-                FillColor = new MagickColor(options.TextColor),
-                TextInterlineSpacing = 10,
-                Width = 1520
-            };
-
-            using (var top = new MagickImage($"caption:-", topSettings))
-            {
-                using (var bottom = new MagickImage($"caption:{options.Text}", bottomSettings))
-                {
-                    using (var badge = new MagickImageCollection())
-                    {
-                        bottom.BorderColor = new MagickColor(options.Color);
-                        bottom.Border(100, 0);
-
-                        badge.Add(top);
-                        badge.Add(bottom);
-
-                        using (var result = badge.AppendVertically())
-                        {
-                            result.BackgroundColor = MagickColors.Transparent;
-                            // result.Rotate(options.Angle);
-
-                            result.Write($"{OutputDir}{Path.DirectorySeparatorChar}badge.png");
-                        }
-                    }
-                }
-            }
-        }
-
-        private static void AppendBadge(BadgeOptions options, string path)
-        {
-            using (var icon = new MagickImage(path))
-            {
-                var badge = new MagickImage($"{OutputDir}{Path.DirectorySeparatorChar}badge.png");
-
-                badge.Resize(icon.Width + icon.Width / 2, icon.Height + icon.Height / 2);
-                badge.BackgroundColor = MagickColors.Transparent;
-                badge.Rotate(options.Angle);
-
-                var offsetX = icon.Width * options.OffsetX / 100;
-                var offsetY = icon.Height * options.OffsetY / 100;
-                // icon.Composite(
-                //     badge,
-                //     Enum.Parse<Gravity>(options.Position),
-                //     new PointD(offsetX, offsetY),
-                //     CompositeOperator.Over
-                // );
-                
-                icon.Composite(badge,Enum.Parse<Gravity>(options.Position), offsetX, offsetY, CompositeOperator.Over);
-
-                Console.WriteLine(
-                    $"Writing to: {(options.Replace ? path : $"{OutputDir}{Path.DirectorySeparatorChar}{Path.GetFileName(path)}")}");
-
-                icon.Write(options.Replace
-                    ? path
-                    : $"{OutputDir}{Path.DirectorySeparatorChar}{Path.GetFileName(path)}");
-            }
-        }
-
-        private static int Main(string[] args)
-        {
-            
-            var rootCommand = new RootCommand
-            {
-                Description = "A command-line tool that adds labels to your app icon",
-                Name = "badger"
-            };
-
-            rootCommand.AddArgument(new Argument<string>("text", "Set label text"));
-            rootCommand.AddArgument(new Argument<string>("icon",
-                "Set path to icon with format .png | .jpg | .jpeg | .appiconset"));
-
-            AddAllOptions(rootCommand);
-
-            rootCommand.Handler = CommandHandler.Create(
-                (BadgeOptions badgeOptions) =>
-                {
-                    CreateBadge(badgeOptions);
-
-                    var fileAttributes = File.GetAttributes(badgeOptions.Icon);
-
-                    if (fileAttributes.HasFlag(FileAttributes.Directory))
-                    {
-                        var files = Directory.EnumerateFiles(badgeOptions.Icon, "*.*", SearchOption.AllDirectories)
-                            .Where(s => s.EndsWith(".png") || s.EndsWith(".jpg") || s.EndsWith(".jpeg"));
-
-                        foreach (var file in files)
-                        {
-                            AppendBadge(badgeOptions, file);
-                        }
-                    }
-                    else
-                    {
-                        AppendBadge(badgeOptions, badgeOptions.Icon);
-                    }
-
-                    if (badgeOptions.Replace)
-                    {
-                        Directory.Delete(OutputDir, true);
-                    }
-                    else
-                    {
-                        File.Delete($"{OutputDir}{Path.DirectorySeparatorChar}badge.png");
-                    }
-                });
-
-            return rootCommand.InvokeAsync(args).Result;
-        }
-    }
+    foreach (var file in di.GetFiles()) file.Delete();
+    foreach (var dir in di.GetDirectories()) dir.Delete(true);
 }
+
+string SanitizeFileName(string fileName)
+{
+    fileName = Path.GetFileNameWithoutExtension(fileName);
+    fileName = fileName.Replace(" ", "_");
+    return string.Join("_", fileName.Split(Path.GetInvalidFileNameChars()));
+}
+
+PointF GetPivotPoint(string pivot, Size badgeSize, Size imageSize)
+{
+    return pivot switch
+    {
+        "top" => new PointF((imageSize.Width - badgeSize.Width) / 2f, 0),
+        "left" => new PointF(0, (imageSize.Height - badgeSize.Height) / 2f),
+        "bottom" => new PointF((imageSize.Width - badgeSize.Width) / 2f, imageSize.Height - badgeSize.Height),
+        "right" => new PointF(imageSize.Width - badgeSize.Width, (imageSize.Height - badgeSize.Height) / 2f),
+        "topLeft" => new PointF(0, 0),
+        "topRight" => new PointF(imageSize.Width - badgeSize.Width, 0),
+        "bottomLeft" => new PointF(0, imageSize.Height - badgeSize.Height),
+        "bottomRight" => new PointF(imageSize.Width - badgeSize.Width, imageSize.Height - badgeSize.Height),
+        "center" => new PointF((imageSize.Width - badgeSize.Width) / 2f, (imageSize.Height - badgeSize.Height) / 2f),
+        _ => new PointF((imageSize.Width - badgeSize.Width) / 2f, (imageSize.Height - badgeSize.Height) / 2f)
+    };
+}
+
+TextAlignment GetTextAlignment(string alignment)
+{
+    return alignment switch
+    {
+        "left" => TextAlignment.Start,
+        "center" => TextAlignment.Center,
+        "right" => TextAlignment.End,
+        _ => TextAlignment.Center
+    };
+}
+
+void CreateBadge(string text, string icon, string fontName, int width, int height, string color,
+    string textColor,
+    string textAlignment,
+    int angle, string badgePivot, int horizontalPadding, int verticalPadding, string horizontalPivot,
+    string verticalPivot)
+
+{
+    var image = Image.Load(icon);
+    var font = SystemFonts.CreateFont(fontName, 10, FontStyle.Bold);
+
+    var blankImage = new Image<Rgba32>(image.Width, image.Height);
+
+    var inputImageSize = image.Size();
+
+    using var badgeImage = blankImage.Clone(ctx =>
+    {
+        var imageSize = ctx.GetCurrentSize();
+
+        width = imageSize.Width * width / 100;
+        height = imageSize.Height * height / 100;
+
+        var pivot = GetPivotPoint(badgePivot, new Size(width, height), inputImageSize);
+
+        var textHolder = new RectangularPolygon(pivot, new SizeF(width, height));
+        var textSize = TextMeasurer.Measure(text, new TextOptions(font));
+        var textScalingFactor = Math.Min(
+            width / (textSize.Width + horizontalPadding / 2f),
+            height / (textSize.Height + verticalPadding / 2f));
+        var scaledFont = new Font(font, textScalingFactor * font.Size);
+
+        var textOptions = new TextOptions(scaledFont)
+        {
+            Origin = new Vector2(textHolder.Center.X, textHolder.Center.Y),
+            HorizontalAlignment = Enum.Parse<HorizontalAlignment>(horizontalPivot, true),
+            VerticalAlignment = Enum.Parse<VerticalAlignment>(verticalPivot, true),
+            TextAlignment = GetTextAlignment(textAlignment)
+        };
+
+        ctx.Fill(Color.Parse(color), textHolder);
+        ctx.DrawText(textOptions, text, Color.Parse(textColor));
+        ctx.Rotate(angle);
+        ctx.Resize(inputImageSize);
+    });
+
+
+    badgeImage.Save($"{outputDir}{Path.DirectorySeparatorChar}{SanitizeFileName(icon)}_badge.png");
+}
+
+void AddBadge(string icon, int offsetX, int offsetY, float opacity, bool overwrite)
+{
+    var image = Image.Load(icon);
+    var badgeName = $"{outputDir}{Path.DirectorySeparatorChar}{SanitizeFileName(icon)}_badge.png";
+    image.Mutate(ctx =>
+    {
+        var badge = Image.Load(badgeName);
+        ctx.DrawImage(badge, new Point(offsetX, offsetY), opacity);
+    });
+
+    Console.WriteLine(
+        $"Writing to: {(overwrite ? icon : $"{outputDir}{Path.DirectorySeparatorChar}{Path.GetFileName(icon)}")}");
+
+    image.Save(overwrite
+        ? icon
+        : $"{outputDir}{Path.DirectorySeparatorChar}{Path.GetFileName(icon)}");
+
+    File.Delete($"{outputDir}{Path.DirectorySeparatorChar}{SanitizeFileName(icon)}_badge.png");
+}
+
+void Badger(
+    [Option(null, "Set badge text")] string text,
+    [Option(null, "Icon path.[.png | .jpg | .jpeg | .appiconset]")]
+    string icon,
+    [Option(null, "Font name")] string fontName = "Arial",
+    [Option(null, "Badge width in percentage. 0 - 100 ")]
+    int width = 100,
+    [Option(null, "Badge height in percentage. 0 - 100 ")]
+    int height = 20,
+    [Option(null, "Set badge background color with a hexadecimal color code")]
+    string color = "#4096EE",
+    [Option(null, "Badge opacity")] float opacity = 1f,
+    [Option(null, "Set badge text color with a hexadecimal color code")]
+    string textColor = "#F9F7ED",
+    [Option(null, "Set badge text alignment. left | center | right")]
+    string textAlignment = "center",
+    [Option("r", "Set badge rotation")] int angle = 0,
+    [Option("x", "Set badge x-axis offset")]
+    int offsetX = 0,
+    [Option("y", "Set badge y-axis offset")]
+    int offsetY = 0,
+    [Option(null,
+        "Set badge pivot point. top | left | bottom | right | topLeft | topRight | bottomLeft | bottomRight | center")]
+    string badgePivot = "bottomLeft",
+    [Option(null, "Set badge text horizontal padding")]
+    int horizontalPadding = 5,
+    [Option(null, "Set badge text vertical padding")]
+    int verticalPadding = 0,
+    [Option(null, "Set badge text horizontal pivot. left | center | right")]
+    string horizontalPivot = "center",
+    [Option(null, "Set badge text vertical pivot. top | center | bottom")]
+    string verticalPivot = "center",
+    [Option("o", "Replace input icon. WARNING: This will overwrite the input icon.")]
+    bool overwrite = false
+)
+{
+    Directory.CreateDirectory(outputDir);
+    EmptyDirectory(outputDir);
+
+    var fileAttributes = File.GetAttributes(icon);
+
+    if (fileAttributes.HasFlag(FileAttributes.Directory))
+    {
+        Console.WriteLine($"Adding badge to all icons in {icon}");
+        var files = Directory.EnumerateFiles(icon, "*.*", SearchOption.AllDirectories)
+            .Where(s => s.EndsWith(".png") || s.EndsWith(".jpg") || s.EndsWith(".jpeg"));
+
+        foreach (var file in files)
+        {
+            CreateBadge(text, file, fontName, width, height, color, textColor, textAlignment, angle,
+                badgePivot,
+                horizontalPadding,
+                verticalPadding, horizontalPivot, verticalPivot);
+            AddBadge(file, offsetX, offsetY, opacity, overwrite);
+        }
+    }
+    else
+    {
+        CreateBadge(text, icon, fontName, width, height, color, textColor, textAlignment, angle, badgePivot,
+            horizontalPadding,
+            verticalPadding, horizontalPivot, verticalPivot);
+        AddBadge(icon, offsetX, offsetY, opacity, overwrite);
+    }
+
+    if (overwrite)
+        Directory.Delete(outputDir, true);
+}
+
+ConsoleApp.Run(args, Badger);
