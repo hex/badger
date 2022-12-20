@@ -52,7 +52,7 @@ jobs:
         run: |
           zip --junk-paths badger-osx-x64.zip ${GITHUB_WORKSPACE}/bin/Release/net7.0/osx-x64/publish/badger
           zip --junk-paths badger-osx-arm64.zip ${GITHUB_WORKSPACE}/bin/Release/net7.0/osx-arm64/publish/badger
-          zip --junk-paths badger-win-x64.zip ${GITHUB_WORKSPACE}/bin/Release/net7.0/win-x64/publish/badger
+          zip --junk-paths badger-win-x64.zip ${GITHUB_WORKSPACE}/bin/Release/net7.0/win-x64/publish/badger.exe
           zip --junk-paths badger-linux-x64.zip ${GITHUB_WORKSPACE}/bin/Release/net7.0/linux-x64/publish/badger
       - name: Create JSON
         uses: jsdaniell/create-json@v1.2.2
