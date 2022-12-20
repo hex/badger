@@ -64,6 +64,7 @@ jobs:
           bundle exec fastlane run notarize skip_stapling:true package:badger-osx-x64.zip bundle_id:com.hexul.badger api_key_path:creds.json print_log:true verbose
           bundle exec fastlane run notarize skip_stapling:true package:badger-osx-arm64.zip bundle_id:com.hexul.badger api_key_path:creds.json print_log:true verbose
       - name: Create release
+        id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
