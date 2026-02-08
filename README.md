@@ -19,7 +19,7 @@ Badger is powered by [SixLabors.ImageSharp](https://github.com/SixLabors/ImageSh
 #### Homebrew
 
 ```sh
-brew tap hex/formulae
+brew tap hex/tap
 brew install badger
 ```
 
