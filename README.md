@@ -1,117 +1,152 @@
-![GitHub](https://img.shields.io/github/license/hex/badger?style=flat-square)
-![Language](https://img.shields.io/badge/language-C%23-blue?style=flat-square)
-![Platform](https://img.shields.io/badge/platform-windows%20%7C%20macos%20%7C%20linux-lightgrey?style=flat-square)
+# badger
 
-<p style="text-align: center">
-<img src="Assets/badger.png" title="Badger" alt="Badger">
-</p>
+A command-line tool that adds labeled badges to app icons. Useful for marking builds with environment labels like ALPHA, BETA, or DEV.
 
-# Badger
+## Install
 
-A cross-platform command-line tool that adds labels to your app icon.
+### Homebrew (macOS)
 
-Badger is powered by [SixLabors.ImageSharp](https://github.com/SixLabors/ImageSharp)
-
-## Installation
-
-### macOS/Linux
-
-#### Homebrew
-
-```sh
-brew tap hex/tap
-brew install badger
+```bash
+brew install hex/tap/badger
 ```
 
-### Windows
+### Scoop (Windows)
 
-#### Scoop
-
-```sh
-scoop bucket add badger https://github.com/hex/Badger
+```bash
+scoop bucket add hex https://github.com/hex/scoop-bucket
 scoop install badger
+```
+
+### Go
+
+```bash
+go install github.com/hex/badger@latest
+```
+
+### Download
+
+Pre-built binaries for macOS (Intel & Apple Silicon), Linux (amd64 & arm64), and Windows are available on the [releases page](https://github.com/hex/badger/releases).
+
+## Usage
+
+```bash
+badger --text "BETA" --icon path/to/icon.png
+```
+
+Output is written to `badgerOutput/` by default. Use `--overwrite` to modify the original file.
+
+### Directory mode
+
+Pass a directory (including `.appiconset` directories) to badge all icons:
+
+```bash
+badger --text "DEV" --icon path/to/AppIcon.appiconset
+```
+
+### Examples
+
+```bash
+# Red badge in top-right corner
+badger --text "ALPHA" --icon icon.png --badge-pivot topRight --color "#E84D39"
+
+# Rotated center badge
+badger --text "DEV" --icon icon.png --badge-pivot center -r -30 --width 60
+
+# Custom font from file
+badger --text "TEST" --icon icon.png --font-name /path/to/CustomFont.ttf
+
+# Overwrite the original icon
+badger --text "BETA" --icon icon.png --overwrite
 ```
 
 ## Options
 
-| Option                 | Description                                                         | Default   |                                     Format                                     |
-|:-----------------------|:--------------------------------------------------------------------|:----------|:------------------------------------------------------------------------------:|
-| `--text`               | Text to be displayed on the badge                                   |           |                                                                                |
-| `--icon`               | Path to the icon file / directory                                   |           |                                                                                |
-| `--font-name`          | Name of the font to be used                                         | `Arial`   |                                                                                |
-| `--height`             | Height as percentage                                                | `20`      |                                   `0 - 100`                                    |
-| `--width`              | Width as percentage                                                 | `100`     |                                   `0 - 100`                                    |
-| `--color`              | Background color                                                    | `#4096EE` |                                                                                |
-| `--opacity`            | Opacity                                                             | `1`       |                                    `0 - 1`                                     |
-| `--text-color`         | Text color                                                          | `#F9F7ED` |                                                                                |
-| `--text-alignment`     | Text alignment                                                      | `center`  |                             `left, center, right`                              |
-| `-r, --angle`          | Rotation angle                                                      | `0`       |                                   `0 - 360`                                    |
-| `-x, --offsetx`        | X-axis offset                                                       | `0`       |                                                                                |
-| `-y, --offsety`        | Y-axis offset                                                       | `0`       |                                                                                |
-| `--badge-pivot`        | Badge pivot point                                                   | `bottom`  | `top, left, bottom, right, topLeft, topRight, bottomLeft, bottomRight, center` |
-| `--horizontal-padding` | Text horizontal padding                                             | `5`       |                                                                                |
-| `--vertical-padding`   | Text vertical padding                                               | `0`       |                                                                                |
-| `--horizontal-pivot`   | Text horizontal pivot                                               | `center`  |                             `left, center, right`                              |
-| `--vertical-pivot`     | Text vertical pivot                                                 | `center`  |                             `top, center, bottom`                              |
-| `-o, --overwrite`      | Replace input icon. **WARNING**: This will overwrite the input icon | `false`   |                                                                                |
+| Flag | Short | Default | Description |
+|---|---|---|---|
+| `--text` | | *required* | Badge text |
+| `--icon` | | *required* | Icon path (.png, .jpg, .jpeg, or directory) |
+| `--font-name` | | `inter` | Bundled font name or path to .ttf/.otf file |
+| `--width` | | `100` | Badge width as % of icon width (0-100) |
+| `--height` | | `20` | Badge height as % of icon height (0-100) |
+| `--color` | | `#4096EE` | Badge background color (hex) |
+| `--opacity` | | `1` | Badge opacity (0-1) |
+| `--text-color` | | `#F9F7ED` | Badge text color (hex) |
+| `--text-alignment` | | `center` | Text alignment: left, center, right |
+| `--angle` | `-r` | `0` | Rotation angle (0-360) |
+| `--offsetx` | `-x` | `0` | X-axis offset |
+| `--offsety` | `-y` | `0` | Y-axis offset |
+| `--badge-pivot` | | `bottomLeft` | Pivot: top, left, bottom, right, topLeft, topRight, bottomLeft, bottomRight, center |
+| `--horizontal-padding` | | `5` | Text horizontal padding |
+| `--vertical-padding` | | `0` | Text vertical padding |
+| `--horizontal-pivot` | | `center` | Text horizontal pivot: left, center, right |
+| `--vertical-pivot` | | `center` | Text vertical pivot: top, center, bottom |
+| `--uppercase` | | `false` | Transform text to uppercase |
+| `--letter-spacing` | | `0` | Extra spacing between characters (pixels) |
+| `--text-outline-color` | | | Text outline color (hex, enables outline) |
+| `--text-outline-width` | | `2` | Text outline width in pixels |
+| `--text-shadow-color` | | | Text shadow color (hex, enables shadow) |
+| `--text-shadow-x` | | `2` | Text shadow X offset |
+| `--text-shadow-y` | | `2` | Text shadow Y offset |
+| `--text-glow-color` | | | Text glow color (hex, enables glow) |
+| `--text-glow-radius` | | `3` | Text glow radius in pixels |
+| `--emboss` | | `false` | Apply emboss effect to text |
+| `--overwrite` | `-o` | `false` | Overwrite input icon (destructive) |
+| `--version` | | | Show version |
 
-## Usage
+## Text Effects
 
-### Examples
+Badger supports several text effects that can be combined:
 
-<p style="text-align: left">
-<img src="Assets/ex1.png" alt="Badger" width="256">
-</p>
+### Outline
 
-```sh
-badger --text ALPHA --icon icon.png --badge-height 25 --angle -45 --horizontal-padding 60 --offsetx 65 --offsety 65
+Adds a colored outline around badge text for improved readability:
+
+```bash
+badger --text "BETA" --icon icon.png --text-outline-color "#000000" --text-outline-width 3
 ```
 
-<p style="text-align: left">
-<img src="Assets/ex2.png" alt="Badger"  width="256">
-</p>
+### Shadow
 
-```sh
-badger --text BETA --icon icon.png --color "#FFFD88" --text-color "#C79811" --offsety -25
+Adds a drop shadow behind the text:
+
+```bash
+badger --text "BETA" --icon icon.png --text-shadow-color "#000000" --text-shadow-x 2 --text-shadow-y 2
 ```
 
-<p style="text-align: left">
-<img src="Assets/ex3.png" alt="Badger"  width="256">
-</p>
+### Glow
 
-```sh
-badger --text DEV --icon icon.png --width 50 --color "#363A3D" --text-color "#CDEB8B" --offsety -100 --badge-pivot bottomRight
+Adds a soft glow around the text:
+
+```bash
+badger --text "BETA" --icon icon.png --text-glow-color "#FFFFFF" --text-glow-radius 4
 ```
 
-```sh
-Usage: badger [options...]
+### Emboss
 
-Options:
-  --text <String>                 Set badge text (Required)
-  --icon <String>                 Icon path.[.png | .jpg | .jpeg | .appiconset] (Required)
-  --font-name <String>            Font name (Default: Arial)
-  --width <Int32>                 Badge width in percentage. 0 - 100  (Default: 100)
-  --height <Int32>                Badge height in percentage. 0 - 100  (Default: 20)
-  --color <String>                Set badge background color with a hexadecimal color code (Default: #4096EE)
-  --opacity <Single>              Badge opacity (Default: 1)
-  --text-color <String>           Set badge text color with a hexadecimal color code (Default: #F9F7ED)
-  --text-alignment <String>       Set badge text alignment. left | center | right (Default: center)
-  -r, --angle <Int32>             Set badge rotation (Default: 0)
-  -x, --offsetx <Int32>           Set badge x-axis offset (Default: 0)
-  -y, --offsety <Int32>           Set badge y-axis offset (Default: 0)
-  --badge-pivot <String>          Set badge pivot point. top | left | bottom | right | topLeft | topRight | bottomLeft | bottomRight (Default: bottomLeft)
-  --horizontal-padding <Int32>    Set badge text horizontal padding (Default: 5)
-  --vertical-padding <Int32>      Set badge text vertical padding (Default: 0)
-  --horizontal-pivot <String>     Set badge text horizontal pivot. left | center | right (Default: center)
-  --vertical-pivot <String>       Set badge text vertical pivot. top | center | bottom (Default: center)
-  -o, --overwrite                 Replace input icon. WARNING: This will overwrite the input icon. (Optional)
+Creates a subtle 3D embossed text effect:
 
-Commands:
-  help       Display help.
-  version    Display version
+```bash
+badger --text "BETA" --icon icon.png --emboss
 ```
+
+### Combining Effects
+
+Effects can be combined freely:
+
+```bash
+badger --text "alpha" --icon icon.png --uppercase --letter-spacing 3 \
+  --text-outline-color "#000000" --text-shadow-color "#333333"
+```
+
+## Bundled Fonts
+
+Badger ships with two embedded fonts so it works without system font dependencies:
+
+- **inter** (default) — [Inter Bold](https://rsms.me/inter/) (SIL Open Font License)
+- **roboto** — [Roboto Bold](https://fonts.google.com/specimen/Roboto) (Apache License 2.0)
+
+Custom fonts can be used by passing a file path to `--font-name`.
 
 ## License
 
-Badger is released under the MIT license. See [LICENSE](https://github.com/hex/badger/blob/master/LICENSE) for more
-information.
+MIT
