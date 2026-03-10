@@ -9,6 +9,11 @@
 # Session cooldown markers
 .cs/.discoveries-reminder-cooldown
 
+# Build output
+badger
+badgerOutput/
+sample-icon.png
+
 # OS files
 .DS_Store
 Thumbs.db

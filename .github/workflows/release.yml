@@ -1,0 +1,195 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+      - run: go test -v ./...
+
+  build:
+    needs: test
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        include:
+          - goos: darwin
+            goarch: amd64
+            artifact: badger-darwin-amd64
+          - goos: darwin
+            goarch: arm64
+            artifact: badger-darwin-arm64
+          - goos: linux
+            goarch: amd64
+            artifact: badger-linux-amd64
+          - goos: linux
+            goarch: arm64
+            artifact: badger-linux-arm64
+          - goos: windows
+            goarch: amd64
+            artifact: badger-windows-amd64
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Set version from tag
+        env:
+          GIT_REF: ${{ github.ref }}
+        run: echo "VERSION=${GIT_REF#refs/tags/v}" >> "$GITHUB_ENV"
+
+      - name: Build
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: '0'
+        run: |
+          EXT=""
+          if [ "$GOOS" = "windows" ]; then EXT=".exe"; fi
+          go build -ldflags "-s -w -X main.version=${VERSION}" -o "badger${EXT}" .
+
+      - name: Codesign macOS binary
+        if: matrix.goos == 'darwin'
+        env:
+          MAC_CERT_BASE64: ${{ secrets.MAC_CERT_BASE64 }}
+          MAC_CERT_PASSWORD: ${{ secrets.MAC_CERT_PASSWORD }}
+        run: |
+          echo "$MAC_CERT_BASE64" | base64 -d > cert.p12
+          security create-keychain -p "" build.keychain
+          security import cert.p12 -k build.keychain -P "$MAC_CERT_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "" build.keychain
+          security list-keychains -d user -s build.keychain
+          codesign --timestamp --options=runtime --force \
+            --sign "Developer ID Application: Alexandru Geana (7G4UQW35EL)" \
+            badger --entitlements entitlements.plist
+          rm cert.p12
+
+      - name: Package
+        env:
+          ARTIFACT: ${{ matrix.artifact }}
+          TARGET_OS: ${{ matrix.goos }}
+        run: |
+          EXT=""
+          if [ "$TARGET_OS" = "windows" ]; then EXT=".exe"; fi
+          zip "${ARTIFACT}.zip" "badger${EXT}"
+
+      - name: Notarize macOS binary
+        if: matrix.goos == 'darwin'
+        env:
+          APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+          ARTIFACT: ${{ matrix.artifact }}
+        run: |
+          echo "$APP_STORE_CONNECT_API_KEY" > creds.json
+          gem install fastlane
+          fastlane run notarize \
+            skip_stapling:true \
+            package:"${ARTIFACT}.zip" \
+            bundle_id:com.hexul.badger \
+            api_key_path:creds.json \
+            print_log:true verbose
+          rm creds.json
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.artifact }}.zip
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: '*.zip'
+          generate_release_notes: true
+
+  update-tap:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+
+      - name: Set version from tag
+        env:
+          GIT_REF: ${{ github.ref }}
+        run: echo "VERSION=${GIT_REF#refs/tags/v}" >> "$GITHUB_ENV"
+
+      - name: Compute SHA256 hashes
+        run: |
+          echo "SHA_DARWIN_AMD64=$(sha256sum badger-darwin-amd64.zip | cut -d' ' -f1)" >> "$GITHUB_ENV"
+          echo "SHA_DARWIN_ARM64=$(sha256sum badger-darwin-arm64.zip | cut -d' ' -f1)" >> "$GITHUB_ENV"
+          echo "SHA_LINUX_AMD64=$(sha256sum badger-linux-amd64.zip | cut -d' ' -f1)" >> "$GITHUB_ENV"
+          echo "SHA_LINUX_ARM64=$(sha256sum badger-linux-arm64.zip | cut -d' ' -f1)" >> "$GITHUB_ENV"
+
+      - name: Update Homebrew formula
+        env:
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          cat > badger.rb <<EOF
+          # ABOUTME: Homebrew formula for Badger, a CLI tool that adds labels to app icons.
+          # ABOUTME: Multi-platform binary distribution (macOS Intel/ARM, Linux).
+
+          class Badger < Formula
+            version "${VERSION}"
+            desc "Command-line tool that adds labels to your app icon"
+            homepage "https://github.com/hex/badger"
+            license "MIT"
+
+            on_macos do
+              if Hardware::CPU.intel?
+                url "https://github.com/hex/badger/releases/download/v${VERSION}/badger-darwin-amd64.zip"
+                sha256 "${SHA_DARWIN_AMD64}"
+              end
+              if Hardware::CPU.arm?
+                url "https://github.com/hex/badger/releases/download/v${VERSION}/badger-darwin-arm64.zip"
+                sha256 "${SHA_DARWIN_ARM64}"
+              end
+            end
+
+            on_linux do
+              if Hardware::CPU.intel?
+                url "https://github.com/hex/badger/releases/download/v${VERSION}/badger-linux-amd64.zip"
+                sha256 "${SHA_LINUX_AMD64}"
+              end
+              if Hardware::CPU.arm?
+                url "https://github.com/hex/badger/releases/download/v${VERSION}/badger-linux-arm64.zip"
+                sha256 "${SHA_LINUX_ARM64}"
+              end
+            end
+
+            def install
+              bin.install "badger"
+            end
+
+            test do
+              system "#{bin}/badger", "--version"
+            end
+          end
+          EOF
+
+          git clone "https://x-access-token:${HOMEBREW_TAP_TOKEN}@github.com/hex/homebrew-tap.git" tap
+          cp badger.rb tap/Formula/badger.rb
+          cd tap
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/badger.rb
+          git commit -m "Update badger to ${VERSION}"
+          git push
