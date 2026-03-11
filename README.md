@@ -14,13 +14,6 @@ A command-line tool that adds labeled badges to app icons. Useful for marking bu
 brew install hex/tap/badger
 ```
 
-### Scoop (Windows)
-
-```bash
-scoop bucket add hex https://github.com/hex/scoop-bucket
-scoop install badger
-```
-
 ### Go
 
 ```bash
