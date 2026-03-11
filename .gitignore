@@ -3,11 +3,8 @@
 *.tmp
 *.bak
 
-# Archives (large, regenerated from artifacts)
-.cs/archives/
-
-# Session cooldown markers
-.cs/.discoveries-reminder-cooldown
+# Session metadata
+.cs/
 
 # Build output
 badger

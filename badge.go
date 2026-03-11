@@ -153,8 +153,8 @@ func createBadge(iconW, iconH int, cfg BadgeConfig) (image.Image, error) {
 
 	hPad := float64(cfg.HPadding)
 	vPad := float64(cfg.VPadding)
-	scaleX := badgeW / (tw + hPad)
-	scaleY := badgeH / (th + vPad)
+	scaleX := badgeW / (tw + hPad/2)
+	scaleY := badgeH / (th + vPad/2)
 	scale := math.Min(scaleX, scaleY)
 	targetSize := scale * 10 // base size was 10
 
@@ -250,12 +250,25 @@ func createBadge(iconW, iconH int, cfg BadgeConfig) (image.Image, error) {
 
 	badgeImg := dc.Image()
 
-	// Apply rotation if needed
+	// Apply rotation: expand canvas to contain rotated content, then
+	// scale back to icon dimensions (matches SixLabors Rotate+Resize behavior).
 	if cfg.Angle != 0 {
-		dc2 := gg.NewContext(iconW, iconH)
-		dc2.RotateAbout(gg.Radians(float64(cfg.Angle)), float64(iconW)/2, float64(iconH)/2)
+		rad := gg.Radians(float64(cfg.Angle))
+		sin := math.Abs(math.Sin(rad))
+		cos := math.Abs(math.Cos(rad))
+		newW := int(math.Ceil(float64(iconW)*cos + float64(iconH)*sin))
+		newH := int(math.Ceil(float64(iconW)*sin + float64(iconH)*cos))
+
+		dc2 := gg.NewContext(newW, newH)
+		dc2.Translate(float64(newW)/2, float64(newH)/2)
+		dc2.Rotate(rad)
+		dc2.Translate(-float64(iconW)/2, -float64(iconH)/2)
 		dc2.DrawImage(badgeImg, 0, 0)
-		badgeImg = dc2.Image()
+
+		dc3 := gg.NewContext(iconW, iconH)
+		dc3.Scale(float64(iconW)/float64(newW), float64(iconH)/float64(newH))
+		dc3.DrawImage(dc2.Image(), 0, 0)
+		badgeImg = dc3.Image()
 	}
 
 	return badgeImg, nil

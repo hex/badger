@@ -1,3 +1,7 @@
+<p style="text-align: center">
+<img src="Assets/badger.png" title="Badger" alt="Badger">
+</p>
+
 # badger
 
 A command-line tool that adds labeled badges to app icons. Useful for marking builds with environment labels like ALPHA, BETA, or DEV.
@@ -45,18 +49,22 @@ badger --text "DEV" --icon path/to/AppIcon.appiconset
 
 ### Examples
 
+<img src="Assets/ex1.png" alt="ALPHA badge example" width="256">
+
 ```bash
-# Red badge in top-right corner
-badger --text "ALPHA" --icon icon.png --badge-pivot topRight --color "#E84D39"
+badger --text ALPHA --icon icon.png --height 25 --angle -45 --horizontal-padding 60 --offsetx 65 --offsety 65
+```
 
-# Rotated center badge
-badger --text "DEV" --icon icon.png --badge-pivot center -r -30 --width 60
+<img src="Assets/ex2.png" alt="BETA badge example" width="256">
 
-# Custom font from file
-badger --text "TEST" --icon icon.png --font-name /path/to/CustomFont.ttf
+```bash
+badger --text BETA --icon icon.png --color "#FFFD88" --text-color "#C79811" --badge-pivot center --offsety -25
+```
 
-# Overwrite the original icon
-badger --text "BETA" --icon icon.png --overwrite
+<img src="Assets/ex3.png" alt="DEV badge example" width="256">
+
+```bash
+badger --text DEV --icon icon.png --width 50 --color "#363A3D" --text-color "#CDEB8B" --offsety -100 --badge-pivot bottomRight
 ```
 
 ## Options
